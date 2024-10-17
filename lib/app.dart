@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:app_assesment/global.dart';
 import 'package:flutter/material.dart';
 
@@ -9,9 +11,25 @@ class App extends StatelessWidget {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       routerConfig: appRouter,
-      title: 'App Assesment',
+      scrollBehavior: MyCusomScrollBehavior(),
+      title: name,
       color: const Color(0xff00CA5D),
-      
+        
     );
   }
+}
+
+class MyCusomScrollBehavior extends MaterialScrollBehavior {
+  Set<PointerDeviceKind> get dragDevices => {
+    PointerDeviceKind.invertedStylus,
+    PointerDeviceKind.mouse,
+    PointerDeviceKind.touch,
+    PointerDeviceKind.trackpad,
+    PointerDeviceKind.unknown,
+    PointerDeviceKind.stylus,
+
+    
+
+
+  };
 }

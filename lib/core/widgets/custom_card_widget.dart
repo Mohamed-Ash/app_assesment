@@ -1,13 +1,14 @@
 import 'package:app_assesment/core/widgets/icon_widget.dart';
 import 'package:flutter/material.dart';
 
-Widget customCardTaskWidget(){
+Widget customCardTaskWidget(context){
   return Card(
     elevation: 2,
+    margin: const EdgeInsets.all(12),
     color: const Color(0xffFDFDFD),
     child: Container(
       // height: 79,
-      width: 300,
+      width: MediaQuery.of(context).size.width > 600 ? 300 :double.infinity,
       // margin: const EdgeInsets.fromLTRB(18, 21, 18, 18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
