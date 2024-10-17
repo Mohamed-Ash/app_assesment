@@ -1,4 +1,5 @@
 import 'package:app_assesment/core/layout/responsive_layout.dart';
+import 'package:app_assesment/core/widgets/custom_button_widget.dart';
 import 'package:app_assesment/core/widgets/icon_widget.dart';
 import 'package:app_assesment/screens/home/widget/home_widget.dart';
 import 'package:flutter/material.dart';
@@ -22,8 +23,8 @@ class HomePage extends ResponsiveLayout {
   }
   
   @override
-  Widget floatingActionButton(BuildContext context) {
-    return  Padding(
+  Widget showFloatingActionButton(BuildContext context) {
+    return Padding(
       padding: const EdgeInsets.only(top: 22),
       child: FloatingActionButton(
         onPressed: ()=> _showTaskPopup(context),
@@ -62,6 +63,7 @@ class HomePage extends ResponsiveLayout {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
+          backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
@@ -84,7 +86,7 @@ class HomePage extends ResponsiveLayout {
                 ),
                 const Text(
                   'Create New Task',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
                 // Task Title Input
@@ -121,8 +123,49 @@ class HomePage extends ResponsiveLayout {
                   ),
                 ),
                 const Spacer(),
-                // Save Task Button
-                SizedBox(
+                customButtonWidget(
+                  context: context,
+                  onPressed: (){},
+                  title: 'Save Task'
+                ),
+                // const Spacer(),
+                // SizedBox(
+                //   width: double.infinity,
+                //   child: ElevatedButton(
+                //     onPressed: () {
+                //       if (_taskController.text.isNotEmpty && _selectedDate != null) {
+                //         // Handle task saving logic here
+                //         print('Task: ${_taskController.text}, Date: $_selectedDate');
+                //         Navigator.of(context).pop(); // Close the dialog
+                //       }
+                //     },
+                //     style: ElevatedButton.styleFrom(
+                //       backgroundColor: const Color(0xff00c95c),
+                //       shape: RoundedRectangleBorder(
+                //         borderRadius: BorderRadius.circular(10),
+                //       ),
+                //       padding: const EdgeInsets.symmetric(vertical: 15),
+                //     ),
+                //     child: const Text(
+                //       'Save Task',
+                //       style: TextStyle(
+                //         fontSize: 16,
+                //       color: Colors.white),
+                //     ),
+                //   ),
+                // ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+
+
+/* SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
@@ -133,7 +176,7 @@ class HomePage extends ResponsiveLayout {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: const Color(0xff00c95c),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -146,15 +189,4 @@ class HomePage extends ResponsiveLayout {
                       color: Colors.white),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-  
- 
+                ), */
