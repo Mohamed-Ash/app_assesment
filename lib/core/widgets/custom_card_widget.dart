@@ -1,7 +1,11 @@
 import 'package:app_assesment/core/widgets/icon_widget.dart';
 import 'package:flutter/material.dart';
 
-Widget customCardTaskWidget(context){
+Widget customCardTaskWidget({
+  required BuildContext context,
+  required String title,
+  required String date,
+}){
   return Card(
     elevation: 2,
     margin: const EdgeInsets.all(12),
@@ -13,24 +17,24 @@ Widget customCardTaskWidget(context){
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
       ),
-      child: const ListTile(
+      child:   ListTile(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Text(
-              'Build UI Android',
-              style: TextStyle(
+              title, //  'Build UI Android',
+              style: const TextStyle(
                 color: Colors.black,
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
                 fontStyle: FontStyle.normal
               ),
             ),
-            SizedBox(height: 6,),
+            const SizedBox(height: 6,),
             Text(
-              'Due Date: Mon. 21/3/2024',
-              style: TextStyle(
+              date, //'Due Date: Mon. 21/3/2024',
+              style: const TextStyle(
                 color: Colors.black,
                 fontSize: 12,
                 fontWeight: FontWeight.w400,
@@ -41,7 +45,7 @@ Widget customCardTaskWidget(context){
           ],
         ),
         minLeadingWidth: 0,
-        trailing: SvgImageWidget(
+        trailing: const SvgImageWidget(
           iconName: 'task_done', 
           color: Color(0xff4ECB71),
           height: 35,
