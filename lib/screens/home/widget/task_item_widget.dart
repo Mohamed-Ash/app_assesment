@@ -1,41 +1,78 @@
 import 'package:app_assesment/core/service/hive_service.dart';
 import 'package:app_assesment/core/widgets/custom_button_widget.dart';
 import 'package:app_assesment/core/widgets/custom_card_widget.dart';
+import 'package:app_assesment/global.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class TaskItemWidget extends StatefulWidget{
-  dynamic tasks;
+  Map<dynamic, dynamic> tasks;
+  final int taskIndex;
 
-  TaskItemWidget({super.key, required this.tasks});
+  TaskItemWidget({super.key, required this.tasks, required this.taskIndex});
 
   @override
   State<TaskItemWidget> createState() => _TaskItemWidgetState();
 }
 
 class _TaskItemWidgetState extends State<TaskItemWidget> {
-  GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  // late List<dynamic> taskList;
 
   final titleController = TextEditingController();
 
   final dateController = TextEditingController();
+  
+  GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  
   @override
   void initState() {
     super.initState();
- 
+      // taskList = widget.tasks;
+    print('taskList taskList taskList ${widget.tasks}');
     // Initialize controllers with the current task data
     titleController.text = widget.tasks['title'] ?? '';
-    
+
     dateController.text = widget.tasks['date'] ?? '';
   }
+
+ 
+
   @override
   Widget build(BuildContext context) {
-    return  InkWell(
-      onTap: () => _showCreateTaskBottomSheet(context),
-      child: customCardTaskWidget(
-        context: context,
-        date: widget.tasks ['data'] ?? '', 
-        title: widget.tasks ['title'] ?? '', 
-      ),
+    return  Builder(
+      builder: (context) {
+        if (widget.tasks.isNotEmpty) { 
+        return Slidable(
+          key: ValueKey(widget.taskIndex), 
+          startActionPane: ActionPane(
+          motion: const ScrollMotion(),
+        
+          // A pane can dismiss the Slidable.
+            dismissible: DismissiblePane(onDismissed: () {}), 
+            children: [
+              SlidableAction(
+                onPressed: _deleteTask,
+                backgroundColor: const Color(0xFFFE4A49),
+                foregroundColor: Colors.white,
+                icon: Icons.delete,
+                label: 'Delete',
+              ),
+            ],
+          ),
+          child: InkWell(
+            onTap: () => _showCreateTaskBottomSheet(context),
+            child: customCardTaskWidget(
+              context: context,
+              date: widget.tasks ['data'] ?? '', 
+              title: widget.tasks ['title'] ?? '', 
+            ),
+          ),
+        );
+      } 
+      else {
+        return  const SizedBox.shrink();
+        }
+      }
     );
   }
 
@@ -71,7 +108,7 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
                     IconButton(
                       icon: const Icon(Icons.close, color: Colors.red),
                       onPressed: () {
-                        Navigator.of(context).pop();
+                        appRouter.pop();
                       },
                     ),
                   ],
@@ -85,6 +122,7 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
                   decoration: InputDecoration(
                     hintText: 'Task title',
                     filled: true,
+                    labelText: widget.tasks['title'],
                     fillColor: Colors.grey[200],
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -97,6 +135,7 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
                   decoration: InputDecoration(
                     hintText: 'Due Date',
                     filled: true,
+                    labelText: widget.tasks['date'],
                     fillColor: Colors.grey[200],
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -109,14 +148,7 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
                   context: context, 
                   title: 'Edit Task', 
                   onPressed: (){
-                    HiveService().insertTask(
-                      titleController.text.hashCode, 
-                      {
-                        'title': titleController.text.toString(), 
-                        'date': titleController.text.toString(),
-                        'status': 'not_done'
-                      }
-                    );
+                    _editTask();
                   }
                 ),
               ],
@@ -126,4 +158,33 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
       },
     );
   }
+
+  Future<void> _deleteTask(BuildContext context) async {
+
+    print('_deleteTask ${widget.tasks.remove(widget.taskIndex)}');
+    print('_deleteTasks ${widget.tasks.remove(widget.taskIndex)}');
+    await HiveService().deleteTask(widget.taskIndex);
+    setState(() { 
+      widget.tasks.clear();
+    });
+  }
+
+  Future<void> _editTask() async {
+    await HiveService().insertTask(
+      widget.tasks['task_key'],
+      {
+        'task_key': widget.tasks['task_key'],
+        'title': titleController.text,
+        'date': dateController.text,
+        'status': widget.tasks['status'],
+      },
+    );
+
+    setState(() {
+      widget.tasks['title'] = titleController.text;
+      widget.tasks['date'] = dateController.text;
+    });
+    appRouter.pop();
+  }
+
 }

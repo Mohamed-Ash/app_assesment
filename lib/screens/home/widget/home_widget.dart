@@ -22,6 +22,7 @@ class _HomeWidgetState extends State<HomeWidget> with SingleTickerProviderStateM
   void initState() {
     super.initState();
     tabcontroller = TabController(length: 3, vsync: this);    
+    getStatusTask();
   }
 
 
@@ -105,20 +106,18 @@ class _HomeWidgetState extends State<HomeWidget> with SingleTickerProviderStateM
               controller: tabcontroller,
               children: [
                 TaskWidget(
-                  tasks: HiveService().getAllTasks().where((element) {
-                    return element['status'] != null && element['status'] == 'all';
-                  }).toList(),
+                  tasks: getStatusTask()
                 ),
-                TaskWidget(
-                  tasks: HiveService().getAllTasks().where((element) {
-                    return element['status'] != null && element['status'] == 'not_done';
-                  }).toList(),
-                ),
-                TaskWidget(
-                  tasks: HiveService().getAllTasks().where((element) {
-                    return element['status'] != null && element['status'] == 'done';
-                  }).toList(),
-                ),
+                // TaskWidget(
+                //   tasks: HiveService().getAllTasks().where((element) {
+                //     return element['status'] != null && element['status'] == 'not_done';
+                //   }).toList(),
+                // ),
+                // TaskWidget(
+                //   tasks: HiveService().getAllTasks().where((element) {
+                //     return element['status'] != null && element['status'] == 'done';
+                //   }).toList(),
+                // ),
               ]
             ),
           ),
@@ -128,6 +127,24 @@ class _HomeWidgetState extends State<HomeWidget> with SingleTickerProviderStateM
       ],
     );
   }
+  
+  List<Map<String,dynamic>> getStatusTask(){
+    var getAllTasks = HiveService().getAllTasks();
+    List<Map<String,dynamic>> listTasks = [];
+    for (var element in getAllTasks) {
+    Map<String,dynamic> mapTasks = Map.from(element);
+    listTasks.add(mapTasks);
+    print('getStatusTask getStatusTask element element ${mapTasks.runtimeType}');
+    print('getStatusTask getStatusTask element element ${mapTasks}');
+    
+    }
+    return listTasks;
+    // return HiveService().getAllTasks().where((element) {
+    //   return element['status']!= null && element['status'] == 'done';
+    // }).length;
+
+  }
+
 
   void _showCreateTaskBottomSheet(BuildContext context) {
   showModalBottomSheet(
@@ -201,7 +218,7 @@ class _HomeWidgetState extends State<HomeWidget> with SingleTickerProviderStateM
                   HiveService().insertTask(
                     titleController.text.hashCode, 
                     { 
-                      'Task_key': titleController.text.hashCode,
+                      'task_key': titleController.text.hashCode,
                       'title': titleController.text.toString(), 
                       'date': titleController.text.toString(),
                       'status': 'not_done'
