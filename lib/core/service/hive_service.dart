@@ -30,8 +30,8 @@ class HiveService {
     return _taskBox?.get(key);
   }
   // 8. حذف مهمة باستخدام الفهرس (index)
-  Future<void> deleteTask(int index) async {
-    await _taskBox?.deleteAt(index);
+  Future<void> deleteTask(int key) async {
+    await _taskBox?.deleteAt(key);
   }
 
   // 9. إغلاق الصندوق عند انتهاء استخدام التطبيق
