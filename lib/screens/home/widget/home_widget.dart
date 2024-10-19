@@ -1,7 +1,7 @@
 import 'package:app_assesment/app.dart';
 import 'package:app_assesment/core/bloc/bloc/task_data_bloc.dart';
+import 'package:app_assesment/core/helper/internet_connectivity_helper.dart';
 import 'package:app_assesment/core/model/task_model.dart';
-import 'package:app_assesment/core/service/hive_service.dart';
 import 'package:app_assesment/core/widgets/custom_button_widget.dart';
 import 'package:app_assesment/global.dart';
 import 'package:app_assesment/screens/home/widget/task_widget.dart';
@@ -28,7 +28,6 @@ class _HomeWidgetState extends State<HomeWidget>
   void initState() {
     super.initState();
     taskBloc = TaskDataBloc<TaskModel>()..add(IndexDataEvent());
-
     tabcontroller = TabController(length: 3, vsync: this);
   }
 
@@ -41,7 +40,7 @@ class _HomeWidgetState extends State<HomeWidget>
           return const Center(child: CircularProgressIndicator(),);
         } else if (state is TaskDataErrorState) {
           return const Center(child: Text('Error loading task data'));
-        } else if (state is TaskDataLoadedState) {
+        } else if (state is TaskDataLoadedState<List<TaskModel>>) {
           return Stack(
             alignment: Alignment.bottomCenter,
             children: [
@@ -123,17 +122,19 @@ class _HomeWidgetState extends State<HomeWidget>
                 body: ScrollConfiguration(
                   behavior: MyCusomScrollBehavior().copyWith(scrollbars: false),
                   child: TabBarView(controller: tabcontroller, children: [
-                    TaskWidget(tasks:  state.data),
+                    TaskWidget(tasks: state.data, taskBloc: taskBloc,),
                     TaskWidget(
                       tasks: state.data.where((element) {
-                        return element['status'] != null &&
-                            element['status'] == 'not_done';
+                        return element.status != null &&
+                            element.status == 'not_done';
                       }).toList(),
+                      taskBloc: taskBloc,
                     ),
                     TaskWidget(
+                      taskBloc: taskBloc,
                       tasks: state.data.where((element) {
-                        return element['status'] != null &&
-                            element['status'] == 'done';
+                        return element.status != null &&
+                            element.status == 'done';
                       }).toList(),
                     ),
                   ]),
@@ -141,9 +142,7 @@ class _HomeWidgetState extends State<HomeWidget>
               ),
               customButtonWidget(
                   context: context,
-                  onPressed: () {
-                    _showCreateTaskBottomSheet(context);
-                  },
+                  onPressed: () => _showCreateTaskBottomSheet(context),
                   title: 'Creadste Task'),
             ],
           );
@@ -152,20 +151,7 @@ class _HomeWidgetState extends State<HomeWidget>
         }
       },
     );
-  }
-
-  /* List<Map<String, dynamic>> getStatusTask() {
-    var getAllTasks = HiveService().getAllTasks();
-    List<Map<String, dynamic>> listTasks = [];
-    for (var element in getAllTasks) {
-      Map<String, dynamic> mapTasks = Map.from(element);
-      listTasks.add(mapTasks); 
-    }
-    return listTasks;
-    // return HiveService().getAllTasks().where((element) {
-    //   return element['status']!= null && element['status'] == 'done';
-    // }).length;
-  } */
+  } 
 
   void _showCreateTaskBottomSheet(BuildContext context) {
     showModalBottomSheet(
@@ -231,21 +217,10 @@ class _HomeWidgetState extends State<HomeWidget>
                 ),
                 const SizedBox(height: 20),
                 customButtonWidget(
-                    context: context,
-                    title: 'Save Task',
-                    onPressed: () {
-                      storeTask();
-                      /*  await HiveService().insertTask(
-                    titleController.text.hashCode, 
-                    { 
-                      'task_key': titleController.text.hashCode,
-                      'title': titleController.text.toString(), 
-                      'date': dateController.text.toString(),
-                      'status': 'not_done'
-                    }
-                  );
-                  appRouter.pop(); */
-                    }),
+                  context: context,
+                  title: 'Save Task',
+                  onPressed: () => storeTask()
+                ),
               ],
             ),
           ),
@@ -254,16 +229,22 @@ class _HomeWidgetState extends State<HomeWidget>
     );
   }
 
-  void storeTask() {
+  void storeTask() async {
+    bool connectivity = await checkInternetConnectivityHelper();
+    
+    String connectivityStatus = connectivity != false ? 'local' : 'remote' ;
     int taskId = DateTime.now().hashCode;
+    
     TaskModel taskModel = TaskModel(
       taskId: taskId,
       title: titleController.text,
       status: 'not_done',
+      // connectivityStatus: 'local',//connectivityStatus,
       cearetedAt: DateTime.now(),
     );
 
     taskBloc.add(StoreDataEvent(taskId: taskId, data: taskModel.toJson()));
+    
     taskBloc.add(IndexDataEvent());
     appRouter.pop();
   }

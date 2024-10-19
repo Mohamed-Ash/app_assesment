@@ -7,12 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 void main() async {
+  debugPrint('[app_assesment] Starting App');
 
-  debugPrint('[Sportera] Initializing Reflections');
-  navigatorKey = GlobalKey<NavigatorState>();
     
+  debugPrint('[app_assesment] Initializing Services');
   await HiveService().initialize();
     
+  navigatorKey = GlobalKey<NavigatorState>();
   appRouter = GoRouter(
     initialLocation: HomePage.pageRoute.path,
     routes: AppRoute.getRouter,
@@ -22,7 +23,6 @@ void main() async {
 
 
   
-  debugPrint('[Sportera] Starting App');
   runApp(const App());
-  debugPrint('[Sportera]  App Started');
+  debugPrint('[app_assesment]  App Started');
 }

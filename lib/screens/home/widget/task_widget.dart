@@ -4,9 +4,10 @@ import 'package:app_assesment/screens/home/widget/task_item_widget.dart';
 import 'package:flutter/material.dart';
 
 class TaskWidget  extends StatelessWidget {
-  final List<dynamic> tasks; 
-  
-  const TaskWidget({super.key, required this.tasks});
+  final List<TaskModel> tasks; 
+  final TaskDataBloc<TaskModel> taskBloc;
+
+  const TaskWidget({super.key, required this.tasks, required this.taskBloc});
 
   @override
   Widget build(BuildContext context) {
@@ -15,19 +16,9 @@ class TaskWidget  extends StatelessWidget {
         if(tasks != null || tasks.isEmpty)
         ...List.generate(
           tasks.length,
-          (index) => TaskItemWidget(tasks: listIndexTasks(tasks as List<Map<dynamic, dynamic>>).elementAt(index), taskIndex: index,)
+          (index) => TaskItemWidget(taskModel: tasks.elementAt(index), taskIndex: index,taskBloc: taskBloc, )
         ),
       ],
     );
-  } 
-
-  List<Map<String, dynamic>> listIndexTasks( List<Map<dynamic, dynamic>> tasks){
-    List<Map<String, dynamic>> indexTasks = [];
-    
-    for (var element in tasks) {
-      indexTasks.add(Map.from(element));
-    }
-
-    return indexTasks;
-  }
+  }  
 }

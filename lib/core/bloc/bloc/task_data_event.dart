@@ -29,11 +29,11 @@ class UpDateDataEvent extends TaskDataEvent{
   });
 }
 
-class DeleteTask extends TaskDataEvent {
+class DeleteDataEvent extends TaskDataEvent {
   final String taskId;
   String? modelKey;
 
-  DeleteTask({
+  DeleteDataEvent({
     required this.taskId,
     this.modelKey,
   });
