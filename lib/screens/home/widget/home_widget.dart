@@ -37,7 +37,9 @@ class _HomeWidgetState extends State<HomeWidget>
       bloc: taskBloc,
       builder: (context, state) {
         if (state is TaskDataLoadingState) {
-          return const Center(child: CircularProgressIndicator(),);
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
         } else if (state is TaskDataErrorState) {
           return const Center(child: Text('Error loading task data'));
         } else if (state is TaskDataLoadedState<List<TaskModel>>) {
@@ -85,14 +87,17 @@ class _HomeWidgetState extends State<HomeWidget>
                     tabs: [
                       tabBarWidget('All'),
                       tabBarWidget('Not Done'),
-                      tabBarWidget('Done'), 
+                      tabBarWidget('Done'),
                     ],
                   ))
                 ],
                 body: ScrollConfiguration(
                   behavior: MyCusomScrollBehavior().copyWith(scrollbars: false),
                   child: TabBarView(controller: tabcontroller, children: [
-                    TaskWidget(tasks: state.data, taskBloc: taskBloc,),
+                    TaskWidget(
+                      tasks: state.data,
+                      taskBloc: taskBloc,
+                    ),
                     TaskWidget(
                       tasks: state.data.where((element) {
                         return element.status != null &&
@@ -113,7 +118,7 @@ class _HomeWidgetState extends State<HomeWidget>
               customButtonWidget(
                   context: context,
                   onPressed: () => _showCreateTaskBottomSheet(context),
-                  title: 'Creadste Task'),
+                  title: 'Create Task'),
             ],
           );
         } else {
@@ -121,7 +126,7 @@ class _HomeWidgetState extends State<HomeWidget>
         }
       },
     );
-  } 
+  }
 
   void _showCreateTaskBottomSheet(BuildContext context) {
     showModalBottomSheet(
@@ -129,9 +134,7 @@ class _HomeWidgetState extends State<HomeWidget>
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15.0),
       ),
-      // barrierColor: const Color.fromARGB(195, 255, 255, 255),
       isScrollControlled: true,
-      // backgroundColor: Colors.white,
       builder: (BuildContext context) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
@@ -162,7 +165,12 @@ class _HomeWidgetState extends State<HomeWidget>
                 const SizedBox(height: 10),
                 TextFormField(
                   controller: titleController,
-                  validator: (value) {},
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a task title';
+                    }
+                    return null;
+                  },
                   decoration: InputDecoration(
                     hintText: 'Task title',
                     filled: true,
@@ -174,7 +182,14 @@ class _HomeWidgetState extends State<HomeWidget>
                   ),
                 ),
                 const SizedBox(height: 10),
-                TextField(
+                TextFormField(
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a Due Date';
+                    }
+                    return null;
+                  },
+                  controller: dateController,
                   decoration: InputDecoration(
                     hintText: 'Due Date',
                     filled: true,
@@ -189,7 +204,7 @@ class _HomeWidgetState extends State<HomeWidget>
                 customButtonWidget(
                   context: context,
                   title: 'Save Task',
-                  onPressed: () => _storeTask()
+                  onPressed: () => _validateAndStoreTask(),
                 ),
               ],
             ),
@@ -198,35 +213,44 @@ class _HomeWidgetState extends State<HomeWidget>
       },
     );
   }
-Widget tabBarWidget(String? text){
-  return Container(
-    width: 75,
-    height: 26,
-    decoration: BoxDecoration(
+
+  Widget tabBarWidget(String? text) {
+    return Container(
+      width: 75,
+      height: 26,
+      decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: const Color(0x1900c95c)),
-    child: Tab(
-      text: text,
-      height: 25,
-    ),
-  );
-}
+        color: const Color(0x1900c95c),
+      ),
+      child: Tab(
+        text: text,
+        height: 25,
+      ),
+    );
+  }
+
+  void _validateAndStoreTask() {
+    if (formKey.currentState!.validate()) {
+      _storeTask();
+    }
+  }
+
   void _storeTask() async {
     bool connectivity = await checkInternetConnectivityHelper();
-    
+
     int taskId = DateTime.now().hashCode;
-    
+
     TaskModel taskModel = TaskModel(
       title: titleController.text,
       date: DateTime.now(),
       taskId: taskId,
       status: 'not_done',
-      connectivityStatus: connectivity != false ? 'local' : 'remote' ,
-      cearetedAt: DateTime.now(), 
+      connectivityStatus: connectivity != false ? 'local' : 'remote',
+      cearetedAt: DateTime.now(),
     );
 
     taskBloc.add(StoreDataEvent(taskId: taskId, data: taskModel.toJson()));
-    
+
     taskBloc.add(IndexDataEvent());
     appRouter.pop();
   }
