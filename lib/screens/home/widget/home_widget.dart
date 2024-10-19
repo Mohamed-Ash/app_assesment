@@ -1,7 +1,7 @@
 import 'package:app_assesment/app.dart';
 import 'package:app_assesment/core/bloc/bloc/task_data_bloc.dart';
 import 'package:app_assesment/core/helper/internet_connectivity_helper.dart';
-import 'package:app_assesment/core/model/task_model.dart';
+import 'package:app_assesment/core/models/task_model.dart';
 import 'package:app_assesment/core/widgets/custom_button_widget.dart';
 import 'package:app_assesment/global.dart';
 import 'package:app_assesment/screens/home/widget/task_widget.dart';
@@ -83,39 +83,9 @@ class _HomeWidgetState extends State<HomeWidget>
                       const Color(0x1900c95c),
                     ),
                     tabs: [
-                      Container(
-                        width: 75,
-                        height: 26,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: const Color(0x1900c95c)),
-                        child: const Tab(
-                          text: 'All',
-                          height: 25,
-                        ),
-                      ),
-                      Container(
-                        width: 75,
-                        height: 26,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: const Color(0x1900c95c)),
-                        child: const Tab(
-                          text: 'Not Done',
-                          height: 25,
-                        ),
-                      ),
-                      Container(
-                        width: 75,
-                        height: 26,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: const Color(0x1900c95c)),
-                        child: const Tab(
-                          text: ' Done ',
-                          height: 25,
-                        ),
-                      ),
+                      tabBarWidget('All'),
+                      tabBarWidget('Not Done'),
+                      tabBarWidget('Done'), 
                     ],
                   ))
                 ],
@@ -219,7 +189,7 @@ class _HomeWidgetState extends State<HomeWidget>
                 customButtonWidget(
                   context: context,
                   title: 'Save Task',
-                  onPressed: () => storeTask()
+                  onPressed: () => _storeTask()
                 ),
               ],
             ),
@@ -228,19 +198,31 @@ class _HomeWidgetState extends State<HomeWidget>
       },
     );
   }
-
-  void storeTask() async {
+Widget tabBarWidget(String? text){
+  return Container(
+    width: 75,
+    height: 26,
+    decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: const Color(0x1900c95c)),
+    child: Tab(
+      text: text,
+      height: 25,
+    ),
+  );
+}
+  void _storeTask() async {
     bool connectivity = await checkInternetConnectivityHelper();
     
-    String connectivityStatus = connectivity != false ? 'local' : 'remote' ;
     int taskId = DateTime.now().hashCode;
     
     TaskModel taskModel = TaskModel(
-      taskId: taskId,
       title: titleController.text,
+      date: DateTime.now(),
+      taskId: taskId,
       status: 'not_done',
-      // connectivityStatus: 'local',//connectivityStatus,
-      cearetedAt: DateTime.now(),
+      connectivityStatus: connectivity != false ? 'local' : 'remote' ,
+      cearetedAt: DateTime.now(), 
     );
 
     taskBloc.add(StoreDataEvent(taskId: taskId, data: taskModel.toJson()));

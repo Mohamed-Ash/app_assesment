@@ -1,10 +1,12 @@
+import 'package:app_assesment/core/helper/date_helper.dart';
 import 'package:app_assesment/core/widgets/icon_widget.dart';
 import 'package:flutter/material.dart';
 
 Widget customCardTaskWidget({
   required BuildContext context,
   required String title,
-  required String date,
+  required String status,
+  required DateTime date,
 }){
   return Card(
     elevation: 2,
@@ -33,7 +35,7 @@ Widget customCardTaskWidget({
             ),
             const SizedBox(height: 6,),
             Text(
-              date, //'Due Date: Mon. 21/3/2024',
+              formatDateHelper(date),   
               style: const TextStyle(
                 color: Colors.black,
                 fontSize: 12,
@@ -45,15 +47,16 @@ Widget customCardTaskWidget({
           ],
         ),
         minLeadingWidth: 0,
-        trailing: const SvgImageWidget(
-          iconName: 'task_done', 
-          color: Color(0xff4ECB71),
+        trailing: SvgImageWidget(
+          iconName: status == 'not_done' ?  'not_done_round' : 'task_done', 
+          color: const Color(0xff4ECB71),
           height: 35,
           width: 35,
         ),
       ),
     ),
   );
+  
 }
 
 /* 

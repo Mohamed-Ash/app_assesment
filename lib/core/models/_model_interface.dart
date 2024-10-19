@@ -1,4 +1,4 @@
-import 'package:app_assesment/core/model/task_model.dart'; 
+import 'package:app_assesment/core/models/task_model.dart'; 
 import 'package:collection/collection.dart';
 class ModelClass {
   final String collectionName;

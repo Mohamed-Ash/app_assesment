@@ -1,5 +1,5 @@
 import 'package:app_assesment/core/helper/internet_connectivity_helper.dart';
-import 'package:app_assesment/core/model/_model_interface.dart';
+import 'package:app_assesment/core/models/_model_interface.dart';
 import 'package:app_assesment/core/service/hive_service.dart';
 import 'package:bloc/bloc.dart'; 
 
@@ -19,6 +19,7 @@ class TaskDataBloc<T> extends Bloc<TaskDataEvent, TaskDataState> {
   TaskDataBloc({Function? initFactory}) : super(TaskDataInitialState()) {
     on<IndexDataEvent>(_index);
     on<StoreDataEvent>(_store);
+    on<UpDateDataEvent>(_update);
     on<DeleteDataEvent>(_delete);
 
 
@@ -58,35 +59,11 @@ class TaskDataBloc<T> extends Bloc<TaskDataEvent, TaskDataState> {
       throw Exception(e.toString());
     }
   }
-
-  /* void _index(IndexDataEvent event, Emitter<TaskDataState> emit) async {
-    try {
-      
-      emit(TaskDataLoadingState());
-
-      List<Map<dynamic, dynamic>> getMapTask = hiveService.getAllTasks() as List<Map<dynamic, dynamic>>;
-      List<T> getListTasks = [];
-      if ( await connectivity != false) {
-        for (var element in getMapTask) {
-          // Map<String, dynamic> task = 
-          getListTasks.add(factory?.call(Map<String, dynamic>.from(element)));
-        }
-        print('[_index] [response] [Type] $type [${getListTasks.runtimeType}] [connectivity status]  [local] [local $getListTasks]');
-      } else {
-        print('[_index] [response] [Type] $type [connectivity status]  [remote]');
-
-      }
-      emit(TaskDataLoadedState<List<T>>(data: getListTasks));
-    } catch (e) {
-      emit(TaskDataErrorState(error: e.toString()));
-      throw Exception(e.toString()); 
-    }
-
-  } */
+  
   void _store(StoreDataEvent event, Emitter<TaskDataState> emit)  async {
     emit(TaskDataProgressState());
     try {
-    List<T> getListTasks = [];
+    // List<T> getListTasks = [];
 
       if ( await connectivity != false) {
         await hiveService.insertTask(event.taskId, event.data);
@@ -105,20 +82,40 @@ class TaskDataBloc<T> extends Bloc<TaskDataEvent, TaskDataState> {
       throw Exception(e.toString()); 
     }
   }
+
+  void _update(UpDateDataEvent event, Emitter<TaskDataState> emit) async {
+    emit(TaskDataProgressState());
+    if (await connectivity != false) {
+      try{
+        await hiveService.insertTask(event.taskId, event.data);
+        List<T> getModelData = await _getData();
+
+          emit(TaskDataLoadedState<List<T>>(data: getModelData));
+        } catch (e) {
+        emit(TaskDataErrorState(error: e.toString()));
+        throw Exception(e.toString()); 
+      }
+    } else {
+
+    }
+  }
+
   void _delete(DeleteDataEvent event, Emitter<TaskDataState> emit) async {
     emit(TaskDataProgressState());
 
     if (await connectivity != false) {
       try{
 
-      hiveService.deleteTask(int.parse(event.taskId));
-      List<T> getModelData = await _getData();
+        hiveService.deleteTask(int.parse(event.taskId));
+        List<T> getModelData = await _getData();
 
-      emit(TaskDataLoadedState<List<T>>(data: getModelData));
-      } catch (e) {
-      emit(TaskDataErrorState(error: e.toString()));
-      throw Exception(e.toString()); 
-    }
+        emit(TaskDataLoadedState<List<T>>(data: getModelData));
+        } catch (e) {
+        emit(TaskDataErrorState(error: e.toString()));
+        throw Exception(e.toString()); 
+      }
+    } else {
+
     }
   }
 

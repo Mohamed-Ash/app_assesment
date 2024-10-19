@@ -1,7 +1,9 @@
 import 'package:app_assesment/core/bloc/bloc/task_data_bloc.dart';
-import 'package:app_assesment/core/model/task_model.dart';
-import 'package:app_assesment/core/widgets/custom_button_widget.dart';
+import 'package:app_assesment/core/helper/internet_connectivity_helper.dart';
+import 'package:app_assesment/core/models/task_model.dart';
+import 'package:app_assesment/core/service/hive_service.dart';
 import 'package:app_assesment/core/widgets/custom_card_widget.dart';
+import 'package:app_assesment/core/widgets/custom_show_buttom_sheet.dart';
 import 'package:app_assesment/global.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,12 +36,11 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
     super.initState();
     titleController.text = widget.taskModel.title;
     dateController.text = widget.taskModel.cearetedAt.toString();
-
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder(
+        return BlocBuilder(
       bloc: widget.taskBloc,
       builder: (context, state) {
         if (state is TaskDataLoadingState) {
@@ -47,31 +48,57 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
         } else if (state is TaskDataErrorState) {
           return const Center(child: Text('Error loading task data'));
         } else if (state is TaskDataLoadedState<List<TaskModel>>) {
-          return Slidable(
-            key: ValueKey(widget.taskIndex),
-            startActionPane: ActionPane(
-              motion: const ScrollMotion(),
-              dragDismissible: false,
-              // A pane can dismiss the Slidable.
-              dismissible: DismissiblePane(onDismissed: () {
-                _deleteTask(context);
-              }),
-              children: [
-                SlidableAction(
-                  onPressed: _deleteTask,
-                  backgroundColor: const Color(0xFFFE4A49),
-                  foregroundColor: Colors.white,
-                  icon: Icons.delete,
-                  label: 'Delete',
+          return   Container(
+            margin: const EdgeInsets.only(top: 12),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(12),),
+            child: Slidable(
+              closeOnScroll: true,
+              key: ValueKey(widget.taskIndex),
+              startActionPane: ActionPane(
+                motion: const DrawerMotion(),
+                dragDismissible: false,
+                children: [
+                  SlidableAction(
+                    onPressed: _deleteTask,
+                    backgroundColor: const Color(0xFFFE4A49),
+                    foregroundColor: Colors.white,
+                    icon: Icons.delete,
+                    autoClose: true,
+                    padding: const EdgeInsets.all(2),
+                    label: 'Delete',
+                  ),
+                  // if(widget.taskModel.status != 'done')
+                  SlidableAction(
+                    onPressed: _doneTask,
+                    backgroundColor: const Color(0xff00c95c),
+                    foregroundColor: Colors.white,
+                    autoClose: true,
+                    padding: const EdgeInsets.all(2),
+                    icon:  widget.taskModel.status == 'done' ? Icons.radio_button_unchecked : Icons.task_alt_rounded,
+                    label: widget.taskModel.status == 'done' ? 'Not Done' :' Done',
+                  ),
+                ],
+              ),
+              child: GestureDetector(
+                
+                onTap: () => showCreateTaskBottomSheet(
+                  context: context, 
+                  labelText: widget.taskModel.title, 
+                  dateLabelText: widget.taskModel.cearetedAt.toIso8601String(), 
+                  hintTitle: 'Task title',
+                  hintdate: 'Due Date',
+                  titleButton:'Edit Task',
+                  titleController: titleController, 
+                  subTitleController: dateController, 
+                  onPressed: ()=> _editTask(), 
+                  
                 ),
-              ],
-            ),
-            child: InkWell(
-              onTap: () => _showCreateTaskBottomSheet(context),
-              child: customCardTaskWidget(
-                context: context,
-                date: widget.taskModel.title,
-                title: widget.taskModel.cearetedAt.toIso8601String(),
+                child: customCardTaskWidget(
+                  context: context,
+                  title: widget.taskModel.title,
+                  date: widget.taskModel.date,
+                  status: widget.taskModel.status,
+                ),
               ),
             ),
           );
@@ -80,7 +107,52 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
         }
       },
     );
+
+    
   }
+
+  Future<void> _deleteTask(BuildContext context) async {
+    widget.taskBloc.add(DeleteDataEvent(taskId: widget.taskIndex.toString()));
+    widget.taskBloc.add(IndexDataEvent());
+  }
+
+  void _editTask() async {
+    bool connectivity = await checkInternetConnectivityHelper();
+    
+    TaskModel taskModel = TaskModel(
+      taskId: widget.taskModel.taskId,
+      date: DateTime.now(),
+      title: titleController.text,
+      status: 'not_done',
+      connectivityStatus: connectivity != false ? 'local' : 'remote',
+      cearetedAt: DateTime.now(),
+    );
+    widget.taskBloc.add(UpDateDataEvent(taskId: widget.taskModel.taskId, data: taskModel.toJson()));
+    widget.taskBloc.add(IndexDataEvent());
+    appRouter.pop();
+  }
+  void _doneTask(BuildContext context) async {
+    bool connectivity = await checkInternetConnectivityHelper();
+    
+    TaskModel taskModel = TaskModel(
+      taskId: widget.taskModel.taskId,
+      date: DateTime.now(),
+      title: titleController.text,
+      status: widget.taskModel.status == 'done' ? 'not_done' : 'done''done',
+      connectivityStatus: connectivity != false ? 'local' : 'remote',
+      cearetedAt: DateTime.now(),
+    );
+    widget.taskBloc.add(UpDateDataEvent(taskId: widget.taskModel.taskId, data: taskModel.toJson()));
+    widget.taskBloc.add(IndexDataEvent());
+    appRouter.pop();
+  }
+}
+
+
+
+/* 
+
+
 
   void _showCreateTaskBottomSheet(BuildContext context) {
     showModalBottomSheet(
@@ -161,53 +233,5 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
     );
   }
 
-  Future<void> _deleteTask(BuildContext context) async {
-    // bool connectivity = await checkInternetConnectivityHelper();
 
-    widget.taskBloc.add(DeleteDataEvent(taskId: widget.taskIndex.toString()));
-    widget.taskBloc.add(IndexDataEvent()); // print('_deleteTask ${widget.taskModel.remove(widget.taskIndex)}');
-    // print('_deleteTasks ${widget.taskModel.remove(widget.taskIndex)}');
-    // await HiveService().deleteTask(widget.taskIndex);
-    // setState(() {
-    //   widget.taskModel.clear();
-    // });
-  }
-
-  Future<void> _editTask() async {
-    // await HiveService().insertTask(
-    //   widget.taskModel['task_key'],
-    //   {
-    //     'task_key': widget.taskModel['task_key'],
-    //     'title': titleController.text,
-    //     'date': dateController.text,
-    //     'status': widget.taskModel['status'],
-    //   },
-    // );
-
-    // setState(() {
-    //   widget.taskModel['title'] = titleController.text;
-    //   widget.taskModel['date'] = dateController.text;
-    // });
-    // appRouter.pop();
-  }
-  void storeTask() async {
-    int taskId = DateTime.now().hashCode;
-    /* TaskModel taskModel = TaskModel(
-      taskId: taskId,
-      title: titleController.text,
-      status: 'not_done',
-      cearetedAt: DateTime.now(),
-    ); */
-    // bool connectivity = await checkInternetConnectivityHelper();
-    TaskModel taskModel = TaskModel(
-      taskId: taskId,
-      title: titleController.text,
-      status: 'not_done',
-      // connectivityStatus: con  nectivity == false ? 'local' : 'remote',
-      cearetedAt: DateTime.now(),
-    );
-    widget.taskBloc.add(StoreDataEvent(taskId: taskId, data: taskModel.toJson()));
-    widget.taskBloc.add(IndexDataEvent());
-    appRouter.pop();
-  }
-}
+ */
