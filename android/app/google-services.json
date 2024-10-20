@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "489164787450",
+    "project_id": "flutter-assessment-acd86",
+    "storage_bucket": "flutter-assessment-acd86.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:489164787450:android:58ed58afb83c925852c343",
+        "android_client_info": {
+          "package_name": "com.example.app_assesment"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBIN86p5pEdHrq6JNP5A6kGPIbvE8N0rwE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
