@@ -115,9 +115,14 @@ class _HomeWidgetState extends State<HomeWidget>
                 ),
               ),
               customButtonWidget(
-                  context: context,
-                  onPressed: () => _showCreateTaskBottomSheet(context),
-                  title: 'Create Task'),
+                context: context,
+                onPressed: () {
+                  if (formKey.currentState!.validate()) {
+                    _showCreateTaskBottomSheet(context);
+                  }
+                },
+                title: 'Create Task'
+              ),
             ],
           );
         } else {
@@ -203,7 +208,11 @@ class _HomeWidgetState extends State<HomeWidget>
                 customButtonWidget(
                   context: context,
                   title: 'Save Task',
-                  onPressed: () => _validateAndStoreTask(),
+                  onPressed: () {
+                    if (formKey.currentState!.validate()) {
+                      _validateAndStoreTask();
+                    }
+                  }, 
                 ),
               ],
             ),
@@ -244,8 +253,8 @@ class _HomeWidgetState extends State<HomeWidget>
       date: DateTime.now(),
       taskId: taskId,
       status: 'not_done',
-      connectivityStatus: connectivity != false ? 'local' : 'remote',
-      cearetedAt: DateTime.now(),
+      connectivityStatus: connectivity == false ? 'local' : 'remote',
+      // cearetedAt: DateTime.now(),
     );
 
     widget.taskBloc.add(StoreDataEvent(taskId: taskId, data: taskModel.toJson()));

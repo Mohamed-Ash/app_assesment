@@ -20,6 +20,7 @@ class App extends StatelessWidget {
 }
 
 class MyCusomScrollBehavior extends MaterialScrollBehavior {
+  @override
   Set<PointerDeviceKind> get dragDevices => {
     PointerDeviceKind.invertedStylus,
     PointerDeviceKind.mouse,

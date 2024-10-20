@@ -1,7 +1,10 @@
 import 'package:app_assesment/core/helper/internet_connectivity_helper.dart';
 import 'package:app_assesment/core/models/_model_interface.dart';
 import 'package:app_assesment/core/service/hive_service.dart';
-import 'package:bloc/bloc.dart'; 
+import 'package:bloc/bloc.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart'; 
 
 part 'task_data_event.dart';
 part 'task_data_state.dart';
@@ -65,17 +68,21 @@ class TaskDataBloc<T> extends Bloc<TaskDataEvent, TaskDataState> {
     try {
     // List<T> getListTasks = [];
 
-      if ( await connectivity != false) {
+      if ( await connectivity == false) {
         await hiveService.insertTask(event.taskId, event.data);
 
-        print('[_store] [request] [model] [$modelName] [Type] $type [connectivity status]  [local] ${event.data}');
+        debugPrint('[_store] [request] [model] [$modelName] [Type] $type [connectivity status]  [local] ${event.data}');
       } else {
-        print('[_store] [request] [model] [$modelName]  [Type] $type [connectivity status]  [remote] ${event.data}');
+              
+      final collectionData = FirebaseFirestore.instance.collection(collectionName!);
+      DocumentReference<Map<String, dynamic>> result = await collectionData.add(event.data);
+     
+        debugPrint('[_store] [request] [model] [$modelName]  [Type] $type [Entry] ${result.runtimeType} [connectivity status]  [remote] ${event.data}');
         
       }
-    List<T> getModelData = await _getData();
+    // List<T> getModelData = await _getData();
       // إرسال حالة جديدة لعرض المهام المحدثة
-      emit(TaskDataLoadedState<List<T>>(data: getModelData));
+      // emit(TaskDataLoadedState<List<T>>(data: getModelData));
       // emit(TaskDataLoadedState<T>(data: factory!.call(event.data)));
     } catch (e) {
       emit(TaskDataErrorState(error: e.toString()));
@@ -85,9 +92,29 @@ class TaskDataBloc<T> extends Bloc<TaskDataEvent, TaskDataState> {
 
   void _update(UpDateDataEvent event, Emitter<TaskDataState> emit) async {
     emit(TaskDataProgressState());
-    if (await connectivity != false) {
+    if (await connectivity == false) {
       try{
+
+        if ( await connectivity == false) {
         await hiveService.insertTask(event.taskId, event.data);
+
+        debugPrint('[_store] [request] [model] [$modelName] [Type] $type [connectivity status]  [local] ${event.data}');
+        
+        } else { 
+        Query<Map<String, dynamic>> collection = FirebaseFirestore.instance.collection(collectionName!);
+
+          final collectionData = await collection.get();
+          
+          QueryDocumentSnapshot<Map<String, dynamic>>? doc = collectionData.docs.first;
+
+          final updateData =  FirebaseFirestore.instance.collection(collectionName!);
+          await updateData.doc(doc.id).update(event.data);
+          
+        
+          debugPrint('[_store] [request] [model] [$modelName]  [Type] $type [connectivity status]  [remote] ${event.data}');
+          
+        }
+        // await hiveService.insertTask(event.taskId, event.data);
         List<T> getModelData = await _getData();
 
           emit(TaskDataLoadedState<List<T>>(data: getModelData));
@@ -103,7 +130,7 @@ class TaskDataBloc<T> extends Bloc<TaskDataEvent, TaskDataState> {
   void _delete(DeleteDataEvent event, Emitter<TaskDataState> emit) async {
     emit(TaskDataProgressState());
 
-    if (await connectivity != false) {
+    if (await connectivity == false) {
       try{
 
         hiveService.deleteTask(int.parse(event.taskId));
@@ -122,20 +149,27 @@ class TaskDataBloc<T> extends Bloc<TaskDataEvent, TaskDataState> {
   Future<List<T>> _getData(/* {required List<Map<dynamic, dynamic>> getData} */) async {
     List<Map<dynamic, dynamic>> getMapTask =  hiveService.getAllTasks() as List<Map<dynamic, dynamic>>;
     List<T> getListTasks = [];
-
-    if (await connectivity != false) {
+ 
+     if (await connectivity == false) {
       for (var element in getMapTask) {
-        // التحقق من أن العنصر ليس null قبل تحويله
+
         try {
           Map<String, dynamic> task = Map<String, dynamic>.from(element);
           getListTasks.add(factory?.call(task));
         } catch (e) {
-          print("Error converting element: $element, error: $e");
+          debugPrint("Error converting element: $element, error: $e");
         }
       }
-        print('[_index] [response] [model] [$modelName] [Type] $type [${getListTasks.runtimeType}] [connectivity status]  [local] [local $getListTasks]');
+        debugPrint('[_index] [response] [model] [$modelName] [Type] $type [${getListTasks.runtimeType}] [connectivity status]  [local] [local $getListTasks]');
     } else {
-      print('[_index] [response] [model] [$modelName] [Type] $type [connectivity status]  [remote]');
+        Query<Map<String, dynamic>> collection = FirebaseFirestore.instance.collection(collectionName!);
+
+        final collectionData = await collection.get();
+
+        for (var element in collectionData.docs) {
+          getListTasks.add(factory?.call(element.data()));
+        }
+        debugPrint('[_index] [response] [model] [$modelName] [Type] $type [connectivity status]  [remote]');
     }
     return getListTasks;
   }

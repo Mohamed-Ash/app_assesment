@@ -1,13 +1,11 @@
 import 'package:app_assesment/core/bloc/bloc/task_data_bloc.dart';
 import 'package:app_assesment/core/helper/internet_connectivity_helper.dart';
 import 'package:app_assesment/core/models/task_model.dart';
-import 'package:app_assesment/core/service/hive_service.dart';
 import 'package:app_assesment/core/widgets/custom_button_widget.dart';
 import 'package:app_assesment/core/widgets/custom_card_widget.dart';
 import 'package:app_assesment/core/widgets/custom_show_buttom_sheet.dart';
 import 'package:app_assesment/core/widgets/show_task_dialog.dart';
 import 'package:app_assesment/global.dart';
-import 'package:app_assesment/screens/home/components/show_task_floating_action_button_component.dart';
 import 'package:date_field/date_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -40,7 +38,7 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
   void initState() {
     super.initState();
     titleController.text = widget.taskModel.title;
-    dateController.text = widget.taskModel.cearetedAt.toString();
+    dateController.text = widget.taskModel.date.toString();
     selectedDate = widget.taskModel.date;
   }
 
@@ -93,11 +91,15 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
                     showCreateTaskBottomSheet(
                       context: context,
                       labelText: widget.taskModel.title, 
-                      dateLabelText: widget.taskModel.cearetedAt.toIso8601String(), 
+                      dateLabelText: widget.taskModel.date.toIso8601String(), 
                       hintTitle: 'Task title', 
                       hintdate: 'Due Date',
                       titleButton: 'Edit Task', 
-                      onPressed:  ()=> _editTask(),
+                      onPressed:  () {
+                        if (formKey.currentState!.validate()) {
+                          _editTask();
+                        }
+                      },
                     );
                    /*  showCreateTaskBottomSheet(
                       context: context, 
@@ -208,8 +210,8 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
       date: selectedDate ?? widget.taskModel.date,
       title: titleController.text,
       status: 'not_done',
-      connectivityStatus: connectivity != false ? 'local' : 'remote',
-      cearetedAt: DateTime.now(),
+      connectivityStatus: connectivity == false ? 'local' : 'remote',
+      // cearetedAt: DateTime.now(),
     );
     widget.taskBloc.add(UpDateDataEvent(taskId: widget.taskModel.taskId, data: taskModel.toJson()));
     widget.taskBloc.add(IndexDataEvent());
@@ -223,8 +225,8 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
       date: DateTime.now(),
       title: titleController.text,
       status: widget.taskModel.status == 'done' ? 'not_done' : 'done',
-      connectivityStatus: connectivity != false ? 'local' : 'remote',
-      cearetedAt: DateTime.now(),
+      connectivityStatus: connectivity == false ? 'local' : 'remote',
+      // cearetedAt: DateTime.now(),
     );
     widget.taskBloc.add(UpDateDataEvent(taskId: widget.taskModel.taskId, data: taskModel.toJson()));
     widget.taskBloc.add(IndexDataEvent());

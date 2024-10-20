@@ -52,6 +52,7 @@ class _ShowTaskFloatingActionButtonComponentState extends State<ShowTaskFloating
                 controller: titleController,
                 decoration: InputDecoration(
                   labelText: 'Task title',
+                  
                   fillColor: Colors.grey[200],
                   filled: true,
                   border: OutlineInputBorder(
@@ -59,22 +60,50 @@ class _ShowTaskFloatingActionButtonComponentState extends State<ShowTaskFloating
                     borderSide: BorderSide.none,
                   ),
                 ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a task title';
+                  }
+                  return null; // return null if the input is valid
+                },
               ),
               const SizedBox(height: 10),
               // Due Date Input
               DateTimeFormField(
-                decoration: const InputDecoration(
+                decoration:   InputDecoration(
                   labelText: 'Enter Date',
+                  hintText: 'Due Date',
+                  filled: true,
+                  fillColor: Colors.grey[200], // Background color of the field
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                    borderSide: BorderSide.none, // No border by default
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                    borderSide: const BorderSide(color: Colors.blue, width: 2.0), // Border when focused
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0), // Padding inside the field
                 ),
                 autovalidateMode: AutovalidateMode.always,
                 materialDatePickerOptions: const MaterialDatePickerOptions(fieldLabelText: 'title Task',helpText: 'asdasd',),
                 hideDefaultSuffixIcon: true,
                 // pickerPlatform: DateTimeFieldPickerPlatform.adaptive,
-                
+                validator: (value) {
+                  if (value == null) {
+                    return 'Please select a date';
+                  }
+                  return null; 
+                },
                 firstDate: DateTime.now().add(const Duration(days: 10)),
                 lastDate: DateTime.now().add(const Duration(days: 40)),
                 initialPickerDateTime: DateTime.now().add(const Duration(days: 20)),
                 mode: DateTimeFieldPickerMode.date,
+                initialValue: selectedDate,
+                /* onSaved: (newValue) {
+                  selectedDate = newValue;
+                  
+                }, */
                 onChanged: (DateTime? value) {
                   selectedDate = value;
                 },
@@ -84,8 +113,9 @@ class _ShowTaskFloatingActionButtonComponentState extends State<ShowTaskFloating
                 context: context,
                 onPressed: () {
                   if (widget.taskId == null ) {
-                    _storeTask();
-                    
+                      _storeTask();
+                    // if (formKey.currentState!.validate()){
+                    // }                    
                   }else if (widget.taskId != null) {
                     _editTask(widget.taskId!);
                   }
@@ -117,8 +147,8 @@ class _ShowTaskFloatingActionButtonComponentState extends State<ShowTaskFloating
       date: selectedDate!,
       taskId: taskId,
       status: 'not_done',
-      connectivityStatus: connectivity != false ? 'local' : 'remote' ,
-      cearetedAt: DateTime.now(), 
+      connectivityStatus: connectivity == false ? 'local' : 'remote' ,
+      // cearetedAt: DateTime.now(), 
     );
 
     widget.taskBloc.add(StoreDataEvent(taskId: taskId, data: taskModel.toJson()));
@@ -133,11 +163,11 @@ class _ShowTaskFloatingActionButtonComponentState extends State<ShowTaskFloating
     
     TaskModel taskModel = TaskModel(
       taskId: taskId,
-      date: DateTime.now(),
+      date: selectedDate!,
       title: titleController.text,
       status: 'not_done',
-      connectivityStatus: connectivity != false ? 'local' : 'remote',
-      cearetedAt: DateTime.now(),
+      connectivityStatus: connectivity == false ? 'local' : 'remote',
+      // cearetedAt: DateTime.now(),
     );
     widget.taskBloc.add(UpDateDataEvent(taskId: taskId, data: taskModel.toJson()));
     widget.taskBloc.add(IndexDataEvent());

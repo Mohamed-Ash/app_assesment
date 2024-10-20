@@ -1,16 +1,18 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class TaskModel {
   String title;
   DateTime date;
   String status;
   String? connectivityStatus;
-  DateTime cearetedAt;
+  // DateTime cearetedAt;
   int taskId;
   TaskModel({
     required this.title,
     required this.date,
     required this.status,
     required this.connectivityStatus,
-    required this.cearetedAt,
+    // required this.cearetedAt,
     required this.taskId,
   });
   
@@ -19,7 +21,7 @@ class TaskModel {
     DateTime? date,
     String? status,
     String? connectivityStatus,
-    DateTime? cearetedAt,
+    // DateTime? cearetedAt,
     int? taskId,
   }) {
     return TaskModel(
@@ -27,7 +29,7 @@ class TaskModel {
       date: date ?? this.date,
       status: status ?? this.status,
       connectivityStatus: connectivityStatus ?? this.connectivityStatus,
-      cearetedAt: cearetedAt ?? this.cearetedAt,
+      // cearetedAt: cearetedAt ?? this.cearetedAt,
       taskId: taskId ?? this.taskId,
     );
   }
@@ -38,7 +40,7 @@ class TaskModel {
       'date': date,
       'status': status,
       'connectivityStatus': connectivityStatus,
-      'cearetedAt': cearetedAt.millisecondsSinceEpoch,
+      // 'cearetedAt': cearetedAt.millisecondsSinceEpoch,
       'taskId': taskId,
     };
   }
@@ -46,17 +48,17 @@ class TaskModel {
   factory TaskModel.fromJson(Map<String, dynamic> map) {
     return TaskModel(
       title: map['title'] as String,
-      date:  map['date'] as DateTime,
+      date:  (map['date'] as Timestamp).toDate(),
       status: map['status'] as String,
       connectivityStatus: map['connectivityStatus'] != null ? map['connectivityStatus'] as String : null,
-      cearetedAt: DateTime.fromMillisecondsSinceEpoch(map['cearetedAt'] as int),
+      // cearetedAt: DateTime.fromMillisecondsSinceEpoch(map['cearetedAt'] as int),
       taskId: map['taskId'] as int,
     );
   }
  
   @override
   String toString() {
-    return 'TaskModel(title: $title, date; $date, status: $status, connectivityStatus: $connectivityStatus, cearetedAt: $cearetedAt, taskId: $taskId)';
+    return 'TaskModel(title: $title, date; $date, status: $status, connectivityStatus: $connectivityStatus, taskId: $taskId)';
   }
 
   @override
@@ -68,7 +70,7 @@ class TaskModel {
       other.date == date &&
       other.status == status &&
       other.connectivityStatus == connectivityStatus &&
-      other.cearetedAt == cearetedAt &&
+      // other.cearetedAt == cearetedAt &&
       other.taskId == taskId;
   }
 
@@ -78,7 +80,7 @@ class TaskModel {
       date.hashCode ^
       status.hashCode ^
       connectivityStatus.hashCode ^
-      cearetedAt.hashCode ^
+      // cearetedAt.hashCode ^
       taskId.hashCode;
   }
 }

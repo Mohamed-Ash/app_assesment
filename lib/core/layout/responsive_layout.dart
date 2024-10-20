@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:app_assesment/core/layout/layout_interface.dart';
 import 'package:flutter/material.dart';
 
@@ -9,8 +7,6 @@ abstract class ResponsiveLayout extends LayoutInterface {
   @override
   Widget body(BuildContext context) {
     return Padding(
-      // todo: if mobile returns const EdgeInsets.fromLTRB(22, 31, 22, 0) else const EdgeInsets.fromLTRB(70, 60, 70, 0) 
-      // padding: Platform.isWindows ? const EdgeInsets.fromLTRB(70, 60, 70, 0) : const EdgeInsets.fromLTRB(22, 31, 22, 0),
       padding: MediaQuery.of(context).size.width > 600 ? const EdgeInsets.fromLTRB(70, 60, 70, 0) : const EdgeInsets.fromLTRB(22, 31, 22, 0),
       child: buildBody(context),
     );

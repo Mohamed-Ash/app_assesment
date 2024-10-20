@@ -1,5 +1,4 @@
 import 'package:app_assesment/core/widgets/custom_button_widget.dart';
-import 'package:app_assesment/global.dart';
 import 'package:flutter/material.dart';
 
 
@@ -27,6 +26,7 @@ void showCreateTaskBottomSheet({
   );
 }
 
+// ignore: must_be_immutable
 class ShowTaskButtomSheetComponent extends StatelessWidget {
   final String labelText;
 
@@ -90,8 +90,9 @@ class ShowTaskButtomSheetComponent extends StatelessWidget {
               validator: (value) {
                 if (formKey.currentState!.validate()) {
                   return 'Please enter a value';
+                } else {
+                  return null;
                 }
-                return null;
               },
               decoration: InputDecoration(
                 hintText: hintTitle,
@@ -130,7 +131,7 @@ class ShowTaskButtomSheetComponent extends StatelessWidget {
     );
   }
 }
-
+/* 
 void showCreateTaskBottomSheett({
   Key? formKey,
   required BuildContext context,
@@ -183,8 +184,12 @@ void showCreateTaskBottomSheett({
                 const SizedBox(height: 10),
                 TextFormField(
                   controller: titleController,
-                  validator: (value) {
-                    return validator!(value);
+                 validator: (value) {
+                if (formKey.currentState!.validate()) {
+                  return 'Please enter a value';
+                } else {
+                  return null;
+                }
                   },
                   decoration: InputDecoration(
                     hintText: hintTitle,
@@ -223,4 +228,4 @@ void showCreateTaskBottomSheett({
         );
       },
     );
-  }
+  } */
