@@ -1,4 +1,5 @@
 import 'package:app_assesment/core/helper/date_helper.dart';
+import 'package:app_assesment/core/themes/app_text_style.dart';
 import 'package:app_assesment/core/widgets/icon_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -26,23 +27,12 @@ Widget customCardTaskWidget({
           children: [
             Text(
               title, //  'Build UI Android',
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                fontStyle: FontStyle.normal
-              ),
+              style: AppTextStyles.bodyMedium(),
             ),
             const SizedBox(height: 6,),
             Text(
               formatDateHelper(date),   
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-                fontStyle: FontStyle.normal
-                
-              ),
+              style: AppTextStyles.hintStyle()
             ),
           ],
         ),

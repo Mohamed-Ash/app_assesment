@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:app_assesment/core/themes/colors/app_colors.dart';
 import 'package:app_assesment/global.dart';
 import 'package:flutter/material.dart';
 
@@ -13,7 +14,19 @@ class App extends StatelessWidget {
       routerConfig: appRouter,
       scrollBehavior: MyCusomScrollBehavior(),
       title: name,
-      color: const Color(0xff00CA5D),
+      theme: ThemeData(
+    primaryColor: AppColors.primaryColor,
+    colorScheme: ColorScheme.fromSwatch().copyWith(
+      primary: AppColors.primaryColor,
+      secondary: AppColors.secondaryColor,
+      error: AppColors.redColor,
+      surface: AppColors.whiteColor,
+
+    ),
+
+ 
+      ),
+      color: AppColors.primaryColor,
         
     );
   }

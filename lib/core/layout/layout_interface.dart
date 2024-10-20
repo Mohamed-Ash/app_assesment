@@ -1,7 +1,8 @@
+import 'package:app_assesment/core/themes/colors/app_colors.dart';
 import 'package:flutter/material.dart';
 
 abstract class LayoutInterface extends StatelessWidget {
-  final Color backgroundColor = Colors.white; 
+  final Color backgroundColor = AppColors.whiteColor; 
 
   const LayoutInterface({super.key});
 

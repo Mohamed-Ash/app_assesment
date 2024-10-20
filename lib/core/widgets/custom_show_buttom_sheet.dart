@@ -1,3 +1,7 @@
+import 'package:app_assesment/core/form_fields/custom_text_form_field.dart';
+import 'package:app_assesment/core/form_fields/date_picker_form_field.dart';
+import 'package:app_assesment/core/themes/app_text_style.dart';
+import 'package:app_assesment/core/themes/colors/app_colors.dart';
 import 'package:app_assesment/core/widgets/custom_button_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -5,9 +9,12 @@ import 'package:flutter/material.dart';
 
 void showCreateTaskBottomSheet({
   required BuildContext context,
+   required GlobalKey<FormState> formKey,
+required TextEditingController controller,
   required String labelText,
   required String dateLabelText,
   required String hintTitle,
+  DateTime? selectedDate, 
   required String hintdate,
   required String titleButton,
   required Function()? onPressed,
@@ -16,10 +23,12 @@ void showCreateTaskBottomSheet({
     
     context: context, 
     builder: (context) => ShowTaskButtomSheetComponent(
+      formKey: formKey,
       labelText: labelText, 
       dateLabelText: dateLabelText, 
       hintTitle: hintTitle, 
-      hintdate: hintdate, 
+      controller: controller,
+      hintdate: hintdate, selectedDate: selectedDate,
       titleButton: titleButton, 
       onPressed: onPressed
     ),
@@ -33,29 +42,35 @@ class ShowTaskButtomSheetComponent extends StatelessWidget {
   final String dateLabelText;
 
   final String hintTitle;
-
+  
+  final TextEditingController controller;
+  
   final String hintdate;
-
+  
+  DateTime? selectedDate;
+  
   final String titleButton;
+  
+  GlobalKey<FormState> formKey;
 
   final Function()? onPressed;
 
   ShowTaskButtomSheetComponent({
     super.key, 
+    required this.formKey, 
     required this.labelText, 
     required this.dateLabelText, 
     required this.hintTitle, 
     required this.hintdate, 
     required this.titleButton,
     required this.onPressed,
+    required this.selectedDate,
+    required this.controller,
 
   });
+ 
+ 
 
-  GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
-  TextEditingController titleController = TextEditingController();
-
-  TextEditingController subTitleController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -69,15 +84,12 @@ class ShowTaskButtomSheetComponent extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Create New Task',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: AppTextStyles.headline3() 
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close, color: Colors.red),
+                  icon: const Icon(Icons.close, color: AppColors.redColor),
                   onPressed: () {
                     Navigator.pop(context);
                   },
@@ -85,40 +97,23 @@ class ShowTaskButtomSheetComponent extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
-            TextFormField(
-              controller: titleController,
-              validator: (value) {
-                if (formKey.currentState!.validate()) {
-                  return 'Please enter a value';
-                } else {
-                  return null;
-                }
-              },
-              decoration: InputDecoration(
-                hintText: hintTitle,
-                filled: true,
-                labelText: labelText,
-                fillColor: Colors.grey[200],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
-                ),
-              ),
+            CustomTextFormField(
+              controller: controller,
+              hintText: hintTitle,
+              labelText: labelText,
             ),
             const SizedBox(height: 10),
-            TextFormField(
-              controller: subTitleController,
-              decoration: InputDecoration(
-                hintText: hintdate,
-                filled: true,
-                labelText: dateLabelText,
-                fillColor: Colors.grey[200],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
+            DatePicerFormField(
+              firstDate: DateTime.now().add(const Duration(days: 10)),
+              lastDate: DateTime.now().add(const Duration(days: 40)),
+              initialPickerDateTime: DateTime.now().add(const Duration(days: 20)),
+              selectedDate: selectedDate,
+              labelText: 'Enter Date',
+              hintText: 'Due Date',
+              onChanged: (DateTime? value) {
+                selectedDate = value;
+              },
+            ), 
             const SizedBox(height: 20),
             customButtonWidget(
               context: context,
@@ -131,101 +126,3 @@ class ShowTaskButtomSheetComponent extends StatelessWidget {
     );
   }
 }
-/* 
-void showCreateTaskBottomSheett({
-  Key? formKey,
-  required BuildContext context,
-  required String labelText,
-  required String dateLabelText,
-  required String hintTitle,
-  required String hintdate,
-  required String titleButton,
-  required TextEditingController? titleController,
-  required TextEditingController? subTitleController,
-  String? Function(String?)? validator,
-  required Function()? onPressed,
-
-}) {
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15.0),
-      ),
-      // barrierColor: const Color.fromARGB(195, 255, 255, 255),
-      isScrollControlled: true,
-      // backgroundColor: Colors.white,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Create New Task',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close, color: Colors.red),
-                      onPressed: () {
-                        appRouter.pop();
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  controller: titleController,
-                 validator: (value) {
-                if (formKey.currentState!.validate()) {
-                  return 'Please enter a value';
-                } else {
-                  return null;
-                }
-                  },
-                  decoration: InputDecoration(
-                    hintText: hintTitle,
-                    filled: true,
-                    labelText: labelText,
-                    fillColor: Colors.grey[200],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  controller: subTitleController,
-                  decoration: InputDecoration(
-                    hintText: dateLabelText,
-                    filled: true,
-                    labelText: dateLabelText,
-                    fillColor: Colors.grey[200],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                customButtonWidget(
-                    context: context,
-                    title: titleButton,
-                    onPressed: onPressed
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  } */

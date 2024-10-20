@@ -1,4 +1,5 @@
  
+import 'package:app_assesment/core/themes/app_text_style.dart';
 import 'package:flutter/material.dart';
 
 Widget customButtonWidget ({
@@ -25,9 +26,7 @@ Widget customButtonWidget ({
         ),
         child: Text(
           title,
-          style: titleStyle ?? const TextStyle(
-            fontSize: 16,
-          color: Colors.white),
+          style: titleStyle ?? AppTextStyles.buttonText()
         ),
       ),
     ),
@@ -58,9 +57,7 @@ Widget customButtonWidgetWeb ({
         ),
         child: Text(
           title,
-          style: titleStyle ?? const TextStyle(
-            fontSize: 16,
-          color: Colors.white),
+          style: titleStyle ?? AppTextStyles.buttonText(),
         ),
       ),
     ),

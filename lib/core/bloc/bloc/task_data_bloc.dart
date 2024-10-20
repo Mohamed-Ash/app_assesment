@@ -3,7 +3,6 @@ import 'package:app_assesment/core/models/_model_interface.dart';
 import 'package:app_assesment/core/service/hive_service.dart';
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart'; 
 
 part 'task_data_event.dart';
@@ -91,10 +90,8 @@ class TaskDataBloc<T> extends Bloc<TaskDataEvent, TaskDataState> {
   }
 
   void _update(UpDateDataEvent event, Emitter<TaskDataState> emit) async {
-    emit(TaskDataProgressState());
-    if (await connectivity == false) {
-      try{
-
+    emit(TaskDataProgressState()); 
+      try{ 
         if ( await connectivity == false) {
         await hiveService.insertTask(event.taskId, event.data);
 
@@ -121,10 +118,7 @@ class TaskDataBloc<T> extends Bloc<TaskDataEvent, TaskDataState> {
         } catch (e) {
         emit(TaskDataErrorState(error: e.toString()));
         throw Exception(e.toString()); 
-      }
-    } else {
-
-    }
+      } 
   }
 
   void _delete(DeleteDataEvent event, Emitter<TaskDataState> emit) async {
