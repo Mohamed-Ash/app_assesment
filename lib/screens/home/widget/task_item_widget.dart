@@ -2,9 +2,13 @@ import 'package:app_assesment/core/bloc/bloc/task_data_bloc.dart';
 import 'package:app_assesment/core/helper/internet_connectivity_helper.dart';
 import 'package:app_assesment/core/models/task_model.dart';
 import 'package:app_assesment/core/service/hive_service.dart';
+import 'package:app_assesment/core/widgets/custom_button_widget.dart';
 import 'package:app_assesment/core/widgets/custom_card_widget.dart';
 import 'package:app_assesment/core/widgets/custom_show_buttom_sheet.dart';
+import 'package:app_assesment/core/widgets/show_task_dialog.dart';
 import 'package:app_assesment/global.dart';
+import 'package:app_assesment/screens/home/components/show_task_floating_action_button_component.dart';
+import 'package:date_field/date_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -28,6 +32,7 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
   final titleController = TextEditingController();
   final dateController = TextEditingController();
 
+  DateTime? selectedDate;
 
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -36,6 +41,7 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
     super.initState();
     titleController.text = widget.taskModel.title;
     dateController.text = widget.taskModel.cearetedAt.toString();
+    selectedDate = widget.taskModel.date;
   }
 
   @override
@@ -81,18 +87,96 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
               ),
               child: GestureDetector(
                 
-                onTap: () => showCreateTaskBottomSheet(
-                  context: context, 
-                  labelText: widget.taskModel.title, 
-                  dateLabelText: widget.taskModel.cearetedAt.toIso8601String(), 
-                  hintTitle: 'Task title',
-                  hintdate: 'Due Date',
-                  titleButton:'Edit Task',
-                  titleController: titleController, 
-                  subTitleController: dateController, 
-                  onPressed: ()=> _editTask(), 
-                  
-                ),
+                onTap: () {
+                  if (MediaQuery.of(context).size.width < 600) {
+                    print('object');
+                    showCreateTaskBottomSheet(
+                      context: context,
+                      labelText: widget.taskModel.title, 
+                      dateLabelText: widget.taskModel.cearetedAt.toIso8601String(), 
+                      hintTitle: 'Task title', 
+                      hintdate: 'Due Date',
+                      titleButton: 'Edit Task', 
+                      onPressed:  ()=> _editTask(),
+                    );
+                   /*  showCreateTaskBottomSheet(
+                      context: context, 
+                      labelText: widget.taskModel.title, 
+                      dateLabelText: widget.taskModel.cearetedAt.toIso8601String(), 
+                      hintTitle: 'Task title',
+                      hintdate: 'Due Date',
+                      titleButton:'Edit Task',
+                      titleController: titleController, 
+                      subTitleController: dateController, 
+                      onPressed: ()=> _editTask(), 
+                    ); */
+                  } else {
+                    showTaskDialog(
+                      context: context, 
+                      children: [
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Icon(Icons.close, color: Colors.red),
+                          ),
+                        ),
+                        const Text(
+                          'Create New Task',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 10),
+                        // Task Title Input
+                        TextFormField(
+                          controller: titleController,
+                          decoration: InputDecoration(
+                            labelText: 'Task title',
+                            fillColor: Colors.grey[200],
+                            filled: true,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        // Due Date Input
+                        DateTimeFormField(
+                          decoration: const InputDecoration(
+                            labelText: 'Enter Date',
+                          ),
+                          autovalidateMode: AutovalidateMode.always,
+                          materialDatePickerOptions: const MaterialDatePickerOptions(fieldLabelText: 'title Task',helpText: 'asdasd',),
+                          hideDefaultSuffixIcon: true,
+                          // pickerPlatform: DateTimeFieldPickerPlatform.adaptive,
+                          
+                          firstDate: DateTime.now().add(const Duration(days: 10)),
+                          lastDate: DateTime.now().add(const Duration(days: 40)),
+                          initialPickerDateTime: DateTime.now().add(const Duration(days: 20)),
+                          mode: DateTimeFieldPickerMode.date,
+                          initialValue: selectedDate,
+                          /* onSaved: (newValue) {
+                            selectedDate = newValue;
+                            
+                          }, */
+                          onChanged: (DateTime? value) {
+                            selectedDate = value;
+                          },
+                        ),
+                        const Spacer(),
+                        customButtonWidgetWeb(
+                          context: context,
+                          onPressed: () {
+                            _editTask( ); 
+                          },
+                          title: 'Save Task'
+                        ),
+                      ]
+                    );
+                  }
+                },
                 child: customCardTaskWidget(
                   context: context,
                   title: widget.taskModel.title,
@@ -121,7 +205,7 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
     
     TaskModel taskModel = TaskModel(
       taskId: widget.taskModel.taskId,
-      date: DateTime.now(),
+      date: selectedDate ?? widget.taskModel.date,
       title: titleController.text,
       status: 'not_done',
       connectivityStatus: connectivity != false ? 'local' : 'remote',
@@ -138,13 +222,12 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
       taskId: widget.taskModel.taskId,
       date: DateTime.now(),
       title: titleController.text,
-      status: widget.taskModel.status == 'done' ? 'not_done' : 'done''done',
+      status: widget.taskModel.status == 'done' ? 'not_done' : 'done',
       connectivityStatus: connectivity != false ? 'local' : 'remote',
       cearetedAt: DateTime.now(),
     );
     widget.taskBloc.add(UpDateDataEvent(taskId: widget.taskModel.taskId, data: taskModel.toJson()));
     widget.taskBloc.add(IndexDataEvent());
-    appRouter.pop();
   }
 }
 

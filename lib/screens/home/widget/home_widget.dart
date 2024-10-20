@@ -9,7 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomeWidget extends StatefulWidget {
-  const HomeWidget({super.key});
+  final TaskDataBloc<TaskModel> taskBloc;
+
+  const HomeWidget({super.key, required this.taskBloc});
 
   @override
   State<HomeWidget> createState() => _HomeWidgetState();
@@ -18,7 +20,6 @@ class HomeWidget extends StatefulWidget {
 class _HomeWidgetState extends State<HomeWidget>
     with SingleTickerProviderStateMixin {
   late TabController? tabcontroller;
-  late final TaskDataBloc<TaskModel> taskBloc;
 
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final titleController = TextEditingController();
@@ -27,14 +28,13 @@ class _HomeWidgetState extends State<HomeWidget>
   @override
   void initState() {
     super.initState();
-    taskBloc = TaskDataBloc<TaskModel>()..add(IndexDataEvent());
     tabcontroller = TabController(length: 3, vsync: this);
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder(
-      bloc: taskBloc,
+      bloc: widget.taskBloc,
       builder: (context, state) {
         if (state is TaskDataLoadingState) {
           return const Center(
@@ -94,19 +94,18 @@ class _HomeWidgetState extends State<HomeWidget>
                 body: ScrollConfiguration(
                   behavior: MyCusomScrollBehavior().copyWith(scrollbars: false),
                   child: TabBarView(controller: tabcontroller, children: [
-                    TaskWidget(
-                      tasks: state.data,
-                      taskBloc: taskBloc,
-                    ),
+ 
+                    TaskWidget(tasks: state.data, taskBloc: widget.taskBloc,),
+ 
                     TaskWidget(
                       tasks: state.data.where((element) {
                         return element.status != null &&
                             element.status == 'not_done';
                       }).toList(),
-                      taskBloc: taskBloc,
+                      taskBloc: widget.taskBloc,
                     ),
                     TaskWidget(
-                      taskBloc: taskBloc,
+                      taskBloc: widget.taskBloc,
                       tasks: state.data.where((element) {
                         return element.status != null &&
                             element.status == 'done';
@@ -249,9 +248,9 @@ class _HomeWidgetState extends State<HomeWidget>
       cearetedAt: DateTime.now(),
     );
 
-    taskBloc.add(StoreDataEvent(taskId: taskId, data: taskModel.toJson()));
+    widget.taskBloc.add(StoreDataEvent(taskId: taskId, data: taskModel.toJson()));
 
-    taskBloc.add(IndexDataEvent());
+    widget.taskBloc.add(IndexDataEvent());
     appRouter.pop();
   }
 }
