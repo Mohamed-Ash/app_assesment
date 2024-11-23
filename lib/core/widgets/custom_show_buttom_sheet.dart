@@ -15,12 +15,13 @@ required TextEditingController controller,
   required String dateLabelText,
   required String hintTitle,
   DateTime? selectedDate, 
+  required void Function(DateTime?)? onDateSelected,
+
   required String hintdate,
   required String titleButton,
-  required Function()? onPressed,
+  required Function() onPressed,
 }){
-  showModalBottomSheet(
-    
+  showModalBottomSheet( 
     context: context, 
     builder: (context) => ShowTaskButtomSheetComponent(
       formKey: formKey,
@@ -28,9 +29,14 @@ required TextEditingController controller,
       dateLabelText: dateLabelText, 
       hintTitle: hintTitle, 
       controller: controller,
-      hintdate: hintdate, selectedDate: selectedDate,
+      hintdate: hintdate,
+      selectedDate: selectedDate,
+      onDateSelected:onDateSelected ,
       titleButton: titleButton, 
-      onPressed: onPressed
+      onPressed: () {
+        onPressed();
+        
+      },
     ),
   );
 }
@@ -48,12 +54,12 @@ class ShowTaskButtomSheetComponent extends StatelessWidget {
   final String hintdate;
   
   DateTime? selectedDate;
-  
+  void Function(DateTime?)? onDateSelected;
   final String titleButton;
   
   GlobalKey<FormState> formKey;
 
-  final Function()? onPressed;
+  void Function() onPressed;
 
   ShowTaskButtomSheetComponent({
     super.key, 
@@ -65,6 +71,7 @@ class ShowTaskButtomSheetComponent extends StatelessWidget {
     required this.titleButton,
     required this.onPressed,
     required this.selectedDate,
+    required this.onDateSelected,
     required this.controller,
 
   });
@@ -110,15 +117,18 @@ class ShowTaskButtomSheetComponent extends StatelessWidget {
               selectedDate: selectedDate,
               labelText: 'Enter Date',
               hintText: 'Due Date',
-              onChanged: (DateTime? value) {
-                selectedDate = value;
-              },
+              // onChanged: (DateTime? value) {
+              //   selectedDate = value;
+              // },
+              onChanged: onDateSelected,
             ), 
             const SizedBox(height: 20),
             customButtonWidget(
               context: context,
               title: titleButton,
-              onPressed: onPressed,
+              onPressed: (){ 
+                onPressed();
+              },
             ),
           ],
         ),

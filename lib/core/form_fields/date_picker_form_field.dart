@@ -73,7 +73,7 @@ class DatePicerFormField extends StatelessWidget {
       lastDate: lastDate,
       initialPickerDateTime: selectedDate,
       
-      mode: DateTimeFieldPickerMode.date,
+      mode: DateTimeFieldPickerMode.dateAndTime,
       initialValue: selectedDate,
       onChanged: onChanged,
     );

@@ -3,6 +3,7 @@ import 'package:app_assesment/core/models/_model_interface.dart';
 import 'package:app_assesment/core/service/hive_service.dart';
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart'; 
 
 part 'task_data_event.dart';
@@ -102,7 +103,11 @@ class TaskDataBloc<T> extends Bloc<TaskDataEvent, TaskDataState> {
 
           final collectionData = await collection.get();
           
-          QueryDocumentSnapshot<Map<String, dynamic>>? doc = collectionData.docs.first;
+          // QueryDocumentSnapshot<Map<String, dynamic>>? doc = collectionData.docs.first;
+          QueryDocumentSnapshot<Map<String, dynamic>>? doc = collectionData.docs.firstWhere((element) {
+            debugPrint('element id is ${element.data()[event.modelKey]} && event id is ${event.taskId}');
+            return element.data()[event.modelKey] == event.taskId;
+          },);
 
           final updateData =  FirebaseFirestore.instance.collection(collectionName!);
           await updateData.doc(doc.id).update(event.data);
@@ -136,15 +141,51 @@ class TaskDataBloc<T> extends Bloc<TaskDataEvent, TaskDataState> {
         throw Exception(e.toString()); 
       }
     } else {
+      // final collection = FirebaseFirestore.instance.collection(collectionName!);
 
+      // final collectionData = await collection.get();
+      
+      // QueryDocumentSnapshot<Map<String, dynamic>>? doc = collectionData.docs.first;
+      // QueryDocumentSnapshot<Map<String, dynamic>>? doc = collectionData.docs.firstWhere((element) {
+      //   debugPrint('element id is ${element.data()[event.modelKey]} && event id is ${event.taskId}');
+      //   return element.data()[event.modelKey] == event.taskId;
+      // },);
+       final collection = FirebaseFirestore.instance.collection(collectionName!).where(event.modelKey! ,isEqualTo: event.taskId);
+
+          final collectionData = await collection.get();
+          
+          // QueryDocumentSnapshot<Map<String, dynamic>>? doc = collectionData.docs.first;
+        var doc = collectionData.docs.firstWhereOrNull(
+          (element) {
+            debugPrint('element id is ${element.data()[event.modelKey]} && event id is ${event.taskId}');
+            return element.data()[event.modelKey] == event.taskId;
+          }, 
+        );
+
+          
+      if (doc != null) {
+ 
+        await FirebaseFirestore.instance.collection(collectionName!).doc(doc.id).delete();
+
+      } else {
+        debugPrint('Document with ID ${event.taskId} not found.');
+        emit(TaskDataErrorState(error: 'Document not found'));
+        return;
+      }
+      
+    
+      List<T> getModelData = await _getData();
+      debugPrint('[_store] [request] [model] [$modelName]  [Type] $type [connectivity status]  [remote] $getModelData');
+
+      emit(TaskDataLoadedState<List<T>>(data: getModelData)); 
     }
   }
 
   Future<List<T>> _getData(/* {required List<Map<dynamic, dynamic>> getData} */) async {
     List<Map<dynamic, dynamic>> getMapTask =  hiveService.getAllTasks() as List<Map<dynamic, dynamic>>;
     List<T> getListTasks = [];
- 
-     if (await connectivity == false) {
+  
+    if (await connectivity == false) {
       for (var element in getMapTask) {
 
         try {
@@ -156,14 +197,14 @@ class TaskDataBloc<T> extends Bloc<TaskDataEvent, TaskDataState> {
       }
         debugPrint('[_index] [response] [model] [$modelName] [Type] $type [${getListTasks.runtimeType}] [connectivity status]  [local] [local $getListTasks]');
     } else {
-        Query<Map<String, dynamic>> collection = FirebaseFirestore.instance.collection(collectionName!);
+      Query<Map<String, dynamic>> collection = FirebaseFirestore.instance.collection(collectionName!);
 
-        final collectionData = await collection.get();
+      final collectionData = await collection.get();
 
-        for (var element in collectionData.docs) {
-          getListTasks.add(factory?.call(element.data()));
-        }
-        debugPrint('[_index] [response] [model] [$modelName] [Type] $type [connectivity status]  [remote]');
+      for (var element in collectionData.docs) {
+        getListTasks.add(factory?.call(element.data()));
+      }
+      debugPrint('[_index] [response] [model] [$modelName] [Type] $type [connectivity status]  [remote] $getListTasks');
     }
     return getListTasks;
   }

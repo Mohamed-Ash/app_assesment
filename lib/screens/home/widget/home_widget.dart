@@ -110,7 +110,8 @@ class _HomeWidgetState extends State<HomeWidget>
               ),
               customButtonWidget(
                 context: context,
-                onPressed: () => showCreateTaskBottomSheet(
+                onPressed: () {
+                  showCreateTaskBottomSheet(
                     context: context,
                     formKey: formKey,
                     labelText: 'Task title', 
@@ -120,12 +121,16 @@ class _HomeWidgetState extends State<HomeWidget>
                     hintTitle: 'Task title', 
                     hintdate: 'Due Date',
                     titleButton: 'Save Task', 
+                    onDateSelected: (DateTime? value) {
+                      selectedDate = value;
+                    },
                     onPressed:  () {
                       if (formKey.currentState!.validate()) {
                         _storeTask();
                       }
                     },
-                  ),
+                  );
+                },
                 title: 'Create Task'
               ),
             ],
@@ -241,22 +246,40 @@ class _HomeWidgetState extends State<HomeWidget>
     );
   }
  
-  void _storeTask() async {
+  // void _storeTask() async {
+  //   bool connectivity = await checkInternetConnectivityHelper();
+
+  //   int taskId = DateTime.now().hashCode;
+
+  //   TaskModel taskModel = TaskModel(
+  //     title: titleController.text,
+  //     date: selectedDate!,
+  //     taskId: taskId,
+  //     status: 'not_done',
+  //     connectivityStatus: connectivity == false ? 'local' : 'remote',
+  //     // cearetedAt: DateTime.now(),
+  //   );
+
+  //   widget.taskBloc.add(StoreDataEvent(taskId: taskId, data: taskModel.toJson()));
+
+  //   widget.taskBloc.add(IndexDataEvent());
+  //   appRouter.pop();
+  // }
+    void _storeTask() async {
     bool connectivity = await checkInternetConnectivityHelper();
-
+    
     int taskId = DateTime.now().hashCode;
-
+     
     TaskModel taskModel = TaskModel(
-      title: titleController.text,
-      date: selectedDate!,
       taskId: taskId,
+      date: selectedDate!,
+      title: titleController.text,
       status: 'not_done',
       connectivityStatus: connectivity == false ? 'local' : 'remote',
       // cearetedAt: DateTime.now(),
     );
-
     widget.taskBloc.add(StoreDataEvent(taskId: taskId, data: taskModel.toJson()));
-
+    
     widget.taskBloc.add(IndexDataEvent());
     appRouter.pop();
   }

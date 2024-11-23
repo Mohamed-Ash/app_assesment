@@ -95,6 +95,9 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
                     labelText: 'Task title', 
                     controller: titleController,
                     selectedDate: selectedDate,
+                    onDateSelected: (DateTime? value) {
+                      selectedDate = value;
+                    },
                     dateLabelText: 'Due Date',
                     hintTitle: 'Task title', 
                     hintdate: 'Due Date',
@@ -171,7 +174,7 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
   }
 
   Future<void> _deleteTask(BuildContext context) async {
-    widget.taskBloc.add(DeleteDataEvent(taskId: widget.taskIndex.toString()));
+    widget.taskBloc.add(DeleteDataEvent(taskId: widget.taskModel.taskId.toString(),  modelKey: 'taskId',));
     widget.taskBloc.add(IndexDataEvent());
   }
 
@@ -182,11 +185,11 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
       taskId: widget.taskModel.taskId,
       date: selectedDate ?? widget.taskModel.date,
       title: titleController.text,
-      status: 'not_done',
+      status: widget.taskModel.status,
       connectivityStatus: connectivity == false ? 'local' : 'remote',
       // cearetedAt: DateTime.now(),
     );
-    widget.taskBloc.add(UpDateDataEvent(taskId: widget.taskModel.taskId, data: taskModel.toJson()));
+    widget.taskBloc.add(UpDateDataEvent(taskId: widget.taskModel.taskId, modelKey: 'taskId', data: taskModel.toJson()));
     widget.taskBloc.add(IndexDataEvent());
     appRouter.pop();
   }
@@ -195,13 +198,13 @@ class _TaskItemWidgetState extends State<TaskItemWidget> {
     
     TaskModel taskModel = TaskModel(
       taskId: widget.taskModel.taskId,
-      date: DateTime.now(),
+      date: widget.taskModel.date,
       title: titleController.text,
       status: widget.taskModel.status == 'done' ? 'not_done' : 'done',
       connectivityStatus: connectivity == false ? 'local' : 'remote',
       // cearetedAt: DateTime.now(),
     );
-    widget.taskBloc.add(UpDateDataEvent(taskId: widget.taskModel.taskId, data: taskModel.toJson()));
+    widget.taskBloc.add(UpDateDataEvent(taskId: widget.taskModel.taskId, modelKey: 'taskId', data: taskModel.toJson()));
     widget.taskBloc.add(IndexDataEvent());
   }
 }

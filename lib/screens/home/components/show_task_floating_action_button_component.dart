@@ -164,7 +164,7 @@ class ShowTaskFloatingActionButtonComponent extends StatelessWidget {
       connectivityStatus: connectivity == false ? 'local' : 'remote',
       // cearetedAt: DateTime.now(),
     );
-    taskBloc.add(UpDateDataEvent(taskId: taskId, data: taskModel.toJson()));
+    taskBloc.add(UpDateDataEvent(taskId: taskId, modelKey: 'taskId', data: taskModel.toJson()));
     taskBloc.add(IndexDataEvent());
     appRouter.pop();
   }
